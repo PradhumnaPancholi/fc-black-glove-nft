@@ -51,24 +51,28 @@ contract BlackGlove is ERC721URIStorage, ERC721Enumerable, Ownable{
     ///@notice List of holders//
     mapping(address => uint256) public holders;
 
-    //ToDO : need to work on this //
-    //For tracking claimed addresses from whitelist//
-    mapping(address => bool) public claimed;
-
     uint256 public constant duration = 86400;
+    
     uint256 public immutable end;
 
-
+    address[] public devs;
     ///@notice Event will be triggered whenever funds were deployed//
     event Withdraw(address indexed caller, uint256 amount);
+
+    ///@notice Event will be triggered when commission is paid to dev on a mint//
+    event CommisionPaid(address indexed dev, uint16 amount);
+
     constructor(
         bytes32 _root,
-        address _tokenAddress
+        address _tokenAddress,
+        address[] memory _devs
     ) ERC721 ("Fight Club Black Glove", "FCBG") {
         root = _root;
         end = block.timestamp + duration;
         // set address for MATIC token //
         MATIC = IERC20(_tokenAddress);
+        //set value for dev address to pay 1% commission on a mint //
+        devs = _devs;
     }
 
     ///@notice A unitly function to convert address into bytes32 to verify merkle proof//
@@ -95,17 +99,22 @@ contract BlackGlove is ERC721URIStorage, ERC721Enumerable, Ownable{
         // if the caller is a whitelisted address and under discoount duration, then set cost to 600 MATIC //
         // otherwise 650 MATIC //
         uint16 cost = whitelisted && block.timestamp < end ? discountedPrice : price; 
-        //ToDO:  commissions dev //
+        // ToDo: commissions for dev //
         require(IERC20(MATIC).transferFrom(msg.sender, address(this), cost), "MATIC transfer failed"); 
+        _handleCommissions(cost);
         // safemint and transfer//
         _safeMint(msg.sender, id);
         _setTokenURI(id, TOKEN_URI);
     }
     
-    ///@notice To return value of totalSupply
-   // function totalSupply() public view returns (uint256) {
-     //   return _tokenIds.current();
-    //}
+    ///@notice To pay each dev 1% on a mint
+    function _handleCommissions(uint16 _cost) internal {
+        uint16 amount = _cost * 1/100;
+        for (uint16 i = 0; i < devs.length; i++){
+            require(IERC20(MATIC).transfer(devs[i], amount), "Commision Transaction Failed!");
+            emit CommisionPaid(devs[i], amount);
+        }
+    }
 
 
     //----------------Openzeppelin  overrides ------------------------------------//
