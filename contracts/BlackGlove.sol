@@ -20,10 +20,10 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     IERC20 MATIC;
 
     /// @notice discounted cost for NFT in MATIC//
-    uint16 public discountedPrice = 600;
+    uint256 public discountedPrice = 600 ether;
 
     /// @notice regular cost for NFT in MATIC//
-    uint16 public price = 650;
+    uint256 public price = 650 ether;
 
     //URI to read metadata of images to be deployed
     string constant public TOKEN_URI = "ipfs://QmWPhrAFNjS3JkyEMZSKe4zWGSjXHncUyFiJiSDWyU3qnW";
@@ -108,10 +108,12 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         bool whitelisted = MerkleProof.verify(proof, root, toBytes32(msg.sender)) == true;
         // if the caller is a whitelisted address and under discoount duration, then set cost to 600 MATIC //
         // otherwise 650 MATIC //
-        uint16 cost = whitelisted && block.timestamp > end ? discountedPrice : price; 
+        uint256 cost = whitelisted && block.timestamp > end ? discountedPrice : price;
+        // get funds //
+        require(msg.value == cost, "Insufficient funds!");
         // ToDo: commissions for dev //
-        require(IERC20(MATIC).transferFrom(msg.sender, address(this), cost), "MATIC transfer failed"); 
-        _handleCommissions(cost);
+        //require(IERC20(MATIC).transferFrom(msg.sender, address(this), cost), "MATIC transfer failed"); 
+        //_handleCommissions(cost);
         // safemint and transfer//
         _safeMint(msg.sender, id);
         _setTokenURI(id, TOKEN_URI);

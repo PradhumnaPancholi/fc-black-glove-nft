@@ -9,7 +9,7 @@ async function main() {
 
   //token address - this is for the token that will be used to pay for the NFT //
   // MATIC in this case//
-  const tokenAddress = "0x0000000000000000000000000000000000001010"
+  const tokenAddress = "0x2f2f025143F35a171755Ad1AC2Ac0f29425E38aA"
 
   // dev addresses for commisions //
   const dev = [
@@ -18,7 +18,7 @@ async function main() {
   ]
 
   //FC - wallet
-  const fcWallet = "0x0Abb12C338ee65160c96061051E38a71F49CA471"
+  const fcWallet = "0x916134E688a4a866ff57f4F53F16703F9b8AFa99" //Make sure to change this //
   //discount duration for whitelist//
   const discountDuration = 86400
 
