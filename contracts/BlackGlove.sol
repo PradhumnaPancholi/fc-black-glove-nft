@@ -34,11 +34,6 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     ///@notice For managing "Pause" state //
     bool public paused = false;
 
-   
-    ///@notice Percentage for royalties on secondary sales//
-    uint256 royaltyFeesinBips = 1000;
-
-
     ///@notice For root hash of the merkle tree that stores whitelist address 
     bytes32 public root;
 
@@ -55,6 +50,9 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     address[] public devs;
 
 
+    ///@notice Where funds from mint will go to //
+    address public beneficiary;
+
     ///@notice Event will be triggered whenever funds were deployed//
     event Withdraw(address indexed caller, uint256 amount);
 
@@ -64,16 +62,29 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     constructor(
         bytes32 _root,
         address _tokenAddress,
-        address[] memory _devs
+        address[] memory _devs,
+        address _fcWallet,
+        uint256 _discountDuration
     ) ERC721 ("Fight Club Black Glove", "FCBG") {
         root = _root;
-        end = block.timestamp + duration;
         // set address for MATIC token //
         MATIC = IERC20(_tokenAddress);
         //set value for dev address to pay 1% commission on a mint //
         devs = _devs;
+        //fight club wallet address//
+        beneficiary = _fcWallet;
+        //set discountDuration//
+        discountDuration = _discountDuration;
+        // set timestamp to end discountDuration//
+        end = block.timestamp + discountDuration;
+
     }
 
+
+    ///@notice To get totalSupply
+    function totalSupply() view public returns (uint256){
+        return _tokenIds.current();
+    }
     ///@notice A unitly function to convert address into bytes32 to verify merkle proof//
     function toBytes32(address addr) pure internal returns (bytes32) {
        return bytes32(uint256(uint160(addr))); 
@@ -97,7 +108,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         bool whitelisted = MerkleProof.verify(proof, root, toBytes32(msg.sender)) == true;
         // if the caller is a whitelisted address and under discoount duration, then set cost to 600 MATIC //
         // otherwise 650 MATIC //
-        uint16 cost = whitelisted && block.timestamp < end ? discountedPrice : price; 
+        uint16 cost = whitelisted && block.timestamp > end ? discountedPrice : price; 
         // ToDo: commissions for dev //
         require(IERC20(MATIC).transferFrom(msg.sender, address(this), cost), "MATIC transfer failed"); 
         _handleCommissions(cost);

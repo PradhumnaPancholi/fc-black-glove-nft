@@ -12,6 +12,8 @@ describe("BlackGlove Public Mint Tests", function() {
   let mockMatic: Contract
   let merkletree: any  
   let owner:  any
+  let dev: any
+  let fcWallet: any
   let whitelisted: any 
   let nonWhitelisted: any
   //function ro process addresses for leaf nodes //
@@ -37,8 +39,15 @@ describe("BlackGlove Public Mint Tests", function() {
         mockMatic.transfer(account.address, 2000)
     })
     //-------------------------------------//
-    // ---------Whitelist-----------------//
+    // ---------FC-BlackGlove-Deployment-Prep-----------------//
     // -----------------------------------//
+    // dev wallet address for commisions testing//
+    dev = accounts.slice(0,2).map(function(account:any){
+      return account.address
+    })
+   // console.log('dev', dev)
+    //fc - benficiary wallet//
+    fcWallet = accounts[3].address
     // take first five addresses for whitelist//
     whitelisted = accounts.slice(0, 5)
     // the next five addresses for non-whitelisted accounts
@@ -51,24 +60,16 @@ describe("BlackGlove Public Mint Tests", function() {
     //create MerkleTree for whitelisted addresses 
     merkletree = new MerkleTree(leaves, keccak256, {sortPairs: true})
     const rootHash = await merkletree.getHexRoot()
+    // discount duration - for testing, we are using 60 seconds//
+    const discountDuration = 120 
     //-----------------------------------------//
     //---------BlackGlove----------------------//
     //-----------------------------------------//
     //deploy the contract with root hash for whitelisted MerkleTree
     console.log("Deploying BlackGlove with root hash :", rootHash)
     const BlackGlove = await ethers.getContractFactory("BlackGloveMock")
-    blackglove = await BlackGlove.deploy(rootHash, mockMatic.address)
+    blackglove = await BlackGlove.deploy(rootHash, mockMatic.address, dev, fcWallet, discountDuration)
   })
- // it("Total Supply of 1000", async () => {
- //   await blackglove.setTokenIdToMaxSupply()
-  //  const t = await blackglove.totalSupply()
-   // console.log('totalSupply', t)
-   // const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
-   // console.log("merkle proof", merkleproof)
-   // await mockMatic.approve(blackglove.address, 600);
-   // await expect (blackglove.connect(whitelisted[0]).mint(merkleproof)).to.be.revertedWith("Max supply reached!")
-  //})
-  //
   it("Total supply of 1000", async () => {
     //set the _tokenIds to max supply - the variable used for comparison//
     //console.log('initial id', await blackglove.totalSupply())
@@ -84,10 +85,28 @@ describe("BlackGlove Public Mint Tests", function() {
   })
   it("A whitelisted address can mint the BlackGlove with a discount within the discount period", async () => { 
     const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
-    await mockMatic.approve(blackglove.address, 600);
-    // ToDo: Need to create and expect and test for "Transfer" event "
+    await mockMatic.connect(whitelisted[0]).approve(blackglove.address, 650);
     await expect (blackglove.connect(whitelisted[0]).mint(merkleproof)).to.emit(blackglove, "Transfer");
   })
+  // ALERT! time-sensitive test//
+  it("A whitelisted address can not mint at the discount after discount period is over", async () => {
+    // we will wait for 120000 ms as for test we have set 120 seconds of discountDuration//
+    // after waiting for that period, we are going to call mint function with whitelisted address //
+    // the error should be ERC20: "insufficient allowance" as after discount duration the cost is 650 matic while we only allowded 600
+      setTimeout(async function(){
+        await mockMatic.connect(whitelisted[1]).approve(blackglove.address, 600); 
+        const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[1].address)) 
+        await expect(blackglove.connect(whitelisted[1]).mint(merkleproof)).to.be.revertedWith("ERC20: insufficient allowance")
+      , 120000})
+  })
+  it("A whitelisted address can mint at regular price after discount period is over", async () => {
+      setTimeout(async function(){
+        await mockMatic.connect(whitelisted[1]).approve(blackglove.address, 650); 
+      const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[1].address)) 
+      await expect(blackglove.connect(whitelisted[1]).mint(merkleproof)).to.emit(blackglove, "Transfer")
+      }, 120000)
+  })
+  //whitelist can mint at regular price after discouint duration//
   it("A non-whitelisted address can not mint the BlackGlove with a discount", async () => {
     const merkleproof = await merkletree.getHexProof(padBuffer(nonWhitelisted[0].address))
     await mockMatic.connect(nonWhitelisted[0]).approve(blackglove.address, 600);
@@ -129,7 +148,7 @@ describe("BlackGlove Public Mint Tests", function() {
     expect(await mockMatic.balanceOf(whitelisted[0].address)).to.equal(Number(blackgloveBalance) + Number(ownerBalance))
   })
   it("General User can not withdraw the funds", async () => {
-    await expect(blackglove.connect(whitelisted[1]).withdraw()).to.be.revertedWith("Ownable: caller is not the owner")
+    await expect(blackglove.connect(nonWhitelisted[3]).withdraw()).to.be.revertedWith("Ownable: caller is not the owner")
   })
   // name//
   // symbol//
