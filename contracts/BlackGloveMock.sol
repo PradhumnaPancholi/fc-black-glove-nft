@@ -11,11 +11,10 @@ contract BlackGloveMock is BlackGlove {
 
     constructor(
         bytes32 _root,
-        address _tokenAddress,
         address[] memory _devs,
         address _fcWallet,
         uint256 _discountDuration
-    ) BlackGlove (_root, _tokenAddress, _devs, _fcWallet, _discountDuration) {}
+    ) BlackGlove (_root, _devs, _fcWallet, _discountDuration) {}
 
 
 

@@ -25,7 +25,7 @@ async function main() {
 
   //deploying the contract //
   const BlackGlove = await ethers.getContractFactory("BlackGlove");
-  const blackglove = await BlackGlove.deploy(whitelistRoot, tokenAddress , dev, fcWallet, discountDuration);
+  const blackglove = await BlackGlove.deploy(whitelistRoot, dev, fcWallet, discountDuration);
 
   await blackglove.deployed();
 

@@ -47,7 +47,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     uint256 public immutable end;
 
     ///@notice dev addresses for 1% commission //
-    address[] public devs;
+    address[] public devs ;
 
 
     ///@notice Where funds from mint will go to //
@@ -61,16 +61,15 @@ contract BlackGlove is ERC721URIStorage, Ownable{
 
     constructor(
         bytes32 _root,
-        address _tokenAddress,
         address[] memory _devs,
         address _fcWallet,
         uint256 _discountDuration
     ) ERC721 ("Fight Club Black Glove", "FCBG") {
         root = _root;
         // set address for MATIC token //
-        MATIC = IERC20(_tokenAddress);
+        //MATIC = IERC20(_tokenAddress);- this wass just used for Mock MATIC during testing//
         //set value for dev address to pay 1% commission on a mint //
-        devs = _devs;
+        devs = _devs; 
         //fight club wallet address//
         beneficiary = _fcWallet;
         //set discountDuration//
@@ -110,7 +109,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         // otherwise 650 MATIC //
         uint256 cost = whitelisted && block.timestamp > end ? discountedPrice : price;
         // get funds //
-        require(msg.value == cost, "Insufficient funds!");
+        require(msg.value >= cost, "Insufficient funds!");
         // ToDo: commissions for dev //
         //require(IERC20(MATIC).transferFrom(msg.sender, address(this), cost), "MATIC transfer failed"); 
         //_handleCommissions(cost);
