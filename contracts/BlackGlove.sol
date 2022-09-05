@@ -2,16 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/interfaces/IERC165.sol";
 
 ///@title Fight Club's Black Glove
 
-contract BlackGlove is ERC721URIStorage, ERC721Enumerable, Ownable{
+contract BlackGlove is ERC721URIStorage, Ownable{
     using Counters for Counters.Counter;
     using Strings for uint256;
 
@@ -36,14 +34,10 @@ contract BlackGlove is ERC721URIStorage, ERC721Enumerable, Ownable{
     ///@notice For managing "Pause" state //
     bool public paused = false;
 
-    //ToDo: Need to update for FC//
-    address payable commissions = payable(0x3Eb231C0513eE1F07306c2919FF5F9Ee9308407F);
    
     ///@notice Percentage for royalties on secondary sales//
     uint256 royaltyFeesinBips = 1000;
 
-    ///@notice Contract URI that contains royalty info//
-    string contractURI = "";
 
     ///@notice For root hash of the merkle tree that stores whitelist address 
     bytes32 public root;
@@ -51,11 +45,16 @@ contract BlackGlove is ERC721URIStorage, ERC721Enumerable, Ownable{
     ///@notice List of holders//
     mapping(address => uint256) public holders;
 
-    uint256 public constant duration = 86400;
+    ///@notice duration of discoount for whitelisted address//
+    uint256 public discountDuration;
     
+    ///@notice For timestamp at which discount period ends for whitelisted //
     uint256 public immutable end;
 
+    ///@notice dev addresses for 1% commission //
     address[] public devs;
+
+
     ///@notice Event will be triggered whenever funds were deployed//
     event Withdraw(address indexed caller, uint256 amount);
 
@@ -116,35 +115,6 @@ contract BlackGlove is ERC721URIStorage, ERC721Enumerable, Ownable{
         }
     }
 
-
-    //----------------Openzeppelin  overrides ------------------------------------//
-    // Required as we have imported ERC721Enumerable and ERC721URIStorage//
-    // ERC721URIStorage is required for setting tokenURI//
-    // ERC721Enumerable is required for supportsInterface - needed for royalties //
-    function totalSupply() public view virtual override returns (uint256) {
-        return _tokenIds.current();
-    }
-
-   function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override (ERC721, ERC721Enumerable){
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
-
-    function _burn(uint256 tokenId) internal virtual override (ERC721, ERC721URIStorage){
-        super._burn(tokenId);
-    }
-    
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721Enumerable) returns (bool) {
-        return interfaceId == type(IERC721Enumerable).interfaceId || super.supportsInterface(interfaceId);
-    }
-
-    function tokenURI(uint256 tokenId) public view virtual override (ERC721, ERC721URIStorage)returns (string memory) { 
-        return super.tokenURI(tokenId);
-    }
-    //--------------------------------------------------------------------------------//
     
     function pause() public onlyOwner {
         paused = true;
