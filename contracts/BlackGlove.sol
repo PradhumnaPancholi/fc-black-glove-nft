@@ -62,6 +62,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     constructor(
         bytes32 _root,
         address[] memory _devs,
+        uint256 _discountedPrice,
         address _fcWallet,
         uint256 _discountDuration
     ) ERC721 ("Fight Club Black Glove", "FCBG") {
@@ -72,7 +73,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         devs = _devs;
         //price and discountedPrice - helps a lot for testing //
         price = 1 ether;
-        discountedPrice = 0.5 ether ;
+        discountedPrice  = _discountedPrice ;
         //fight club wallet address//
         beneficiary = _fcWallet;
         //set discountDuration//
@@ -97,7 +98,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         bool whitelisted = MerkleProof.verify(proof, root, toBytes32(msg.sender)) == true;
         // if the caller is a whitelisted address and under discoount duration, then set cost to 600 MATIC //
         // otherwise 650 MATIC //
-        uint256 cost = whitelisted && block.timestamp > end ? discountedPrice : price;
+        uint256 cost = whitelisted && block.timestamp < end ? discountedPrice : price;
         return cost;
     }
     ///@dev create tokens of token type `id` and assigns them to `to`

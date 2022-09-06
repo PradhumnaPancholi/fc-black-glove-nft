@@ -69,7 +69,8 @@ describe("BlackGlove Public Mint Tests", function() {
     //deploy the contract with root hash for whitelisted MerkleTree
     console.log("Deploying BlackGlove with root hash :", rootHash)
     const BlackGlove = await ethers.getContractFactory("BlackGloveMock")
-    blackglove = await BlackGlove.deploy(rootHash, dev, fcWallet, discountDuration)
+ const discountedPrice = ethers.utils.parseEther((0.5).toString())
+    blackglove = await BlackGlove.deploy(rootHash, dev, discountedPrice, fcWallet, discountDuration)
   })
   it("Total supply of 1000", async () => {
     //set the _tokenIds to max supply - the variable used for comparison//
@@ -112,13 +113,13 @@ describe("BlackGlove Public Mint Tests", function() {
       setTimeout(async function(){
         const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[1].address)) 
         await expect(blackglove.connect(whitelisted[1]).mint(merkleproof, {value: ethers.utils.parseEther("600")})).to.be.revertedWith("Insufficient funds!")
-      , 120000})
+      , 200000})
   })
   it("A whitelisted address can mint at regular price after discount period is over", async () => {
       setTimeout(async function(){
       const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[1].address)) 
       await expect(blackglove.connect(whitelisted[1]).mint(merkleproof)).to.emit(blackglove, "Transfer")
-      }, 120000)
+      }, 200000)
   })
   //whitelist can mint at regular price after discouint duration//
   it("A non-whitelisted address can not mint the BlackGlove with a discount", async () => {

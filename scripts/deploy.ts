@@ -24,11 +24,11 @@ async function main() {
 
   // variable for price //
   //const price = 1 
-  //const discountedPrice = 0.5
+  const discountedPrice = ethers.utils.parseEther((0.5).toString())
 
   //deploying the contract //
   const BlackGlove = await ethers.getContractFactory("BlackGlove");
-  const blackglove = await BlackGlove.deploy(whitelistRoot, dev, fcWallet, discountDuration);
+  const blackglove = await BlackGlove.deploy(whitelistRoot, dev, discountedPrice, fcWallet, discountDuration);
 
   await blackglove.deployed();
 
