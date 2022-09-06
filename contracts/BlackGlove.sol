@@ -89,6 +89,13 @@ contract BlackGlove is ERC721URIStorage, Ownable{
        return bytes32(uint256(uint160(addr))); 
     }
 
+    ///@notice To get cost of a mint based on time and proof 
+    function getCost(bytes32[] calldata proof) public returns (uint256) {
+        bool whitelisted = MerkleProof.verify(proof, root, toBytes32(msg.sender)) == true;
+        // if the caller is a whitelisted address and under discoount duration, then set cost to 600 MATIC //
+        // otherwise 650 MATIC //
+        uint256 cost = whitelisted && block.timestamp > end ? discountedPrice : price;
+    }
     ///@dev create tokens of token type `id` and assigns them to `to`
     /// `to` cannot be a zero address
 
@@ -110,7 +117,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         uint256 cost = whitelisted && block.timestamp > end ? discountedPrice : price;
         // get funds //
         require(msg.value >= cost, "Insufficient funds!");
-        _handleCommissions(cost);
+        _moveFunds(cost);
         // safemint and transfer//
         _safeMint(msg.sender, id);
         _setTokenURI(id, TOKEN_URI);
@@ -119,13 +126,18 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     }
     
     ///@notice To pay each dev 1% on a mint
-    function _handleCommissions(uint256 _cost) internal {
+    function _moveFunds(uint256 _cost) internal {
         uint256 amount = _cost * 1/100;
+        //send one parcent to each dev //
         for (uint16 i = 0; i < devs.length; i++){
             (bool success, ) = (devs[i]).call{value: amount}("");
             require(success, "Transaction Failed");
             emit CommisionPaid(devs[i], amount);
         }
+        //send 98% to Fc wallet//
+        uint256 fcAmount = _cost * 98/100;
+        (bool success, ) = payable(benficiary).call{value: fcAmount}("");
+        require(success, "Transaction to benficiary failed!");
     }
 
     
