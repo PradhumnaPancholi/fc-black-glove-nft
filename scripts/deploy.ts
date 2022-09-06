@@ -22,6 +22,9 @@ async function main() {
   //discount duration for whitelist//
   const discountDuration = 86400
 
+  // variable for price //
+  //const price = 1 
+  //const discountedPrice = 0.5
 
   //deploying the contract //
   const BlackGlove = await ethers.getContractFactory("BlackGlove");

@@ -83,6 +83,20 @@ describe("BlackGlove Public Mint Tests", function() {
     await blackglove.resetTokenId()
     expect(await blackglove.totalSupply()).to.equal(0) 
   })
+  it("Non whitelisted gets the cost 650", async () => {
+    const merkleproof = await merkletree.getHexProof(padBuffer(nonWhitelisted[2].address))
+    const cost = await blackglove.connect(whitelisted[0]).getCost(merkleproof)
+    // format the returned value to compare it with the number
+    const formattedCost = Number(ethers.utils.formatEther(cost))
+    await expect(formattedCost).to.equal(650)
+  })
+  it("Witelisted gets the cost 600", async () => {
+    const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
+    const cost = await blackglove.connect(whitelisted[0]).getCost(merkleproof)
+    // format the returned value to compare it with the number
+    const formattedCost = Number(ethers.utils.formatEther(cost)) 
+    expect(formattedCost).to.equal(600)
+  })
   // ToDo - need to work on this one //
   it("A whitelisted address can mint the BlackGlove with a discount within the discount period", async () => { 
     const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
@@ -167,14 +181,6 @@ describe("BlackGlove Public Mint Tests", function() {
   })
   it("General User can not withdraw the funds", async () => {
     await expect(blackglove.connect(nonWhitelisted[3]).withdraw()).to.be.revertedWith("Ownable: caller is not the owner")
-  })
-  it("Non whitelisted gets the cost 650", async () => {
-    const merkleproof = await merkletree.getHexProof(padBuffer(nonWhitelisted[2].address))
-    await expect(await blackglove.connect(nonWhitelisted[2]).getCost(merkleproof)).to.equal(650)
-  })
-  it("Witelisted gets the cost 60", async () => {
-    const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
-    await expect(await blackglove.connect(whitelisted[0]).getCost(merkleproof)).to.equal(600)
   })
   // name//
   // symbol//

@@ -17,10 +17,10 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     Counters.Counter public _tokenIds;
 
     /// @notice discounted cost for NFT in MATIC//
-    uint256 public discountedPrice = 600 ether;
+    uint256 public discountedPrice;
 
     /// @notice regular cost for NFT in MATIC//
-    uint256 public price = 650 ether;
+    uint256 public price;
 
     //URI to read metadata of images to be deployed
     string constant public TOKEN_URI = "ipfs://QmWPhrAFNjS3JkyEMZSKe4zWGSjXHncUyFiJiSDWyU3qnW";
@@ -69,7 +69,10 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         // set address for MATIC token //
         //MATIC = IERC20(_tokenAddress);- this wass just used for Mock MATIC during testing//
         //set value for dev address to pay 1% commission on a mint //
-        devs = _devs; 
+        devs = _devs;
+        //price and discountedPrice - helps a lot for testing //
+        price = 1 ether;
+        discountedPrice = 0.5 ether ;
         //fight club wallet address//
         beneficiary = _fcWallet;
         //set discountDuration//
@@ -90,11 +93,12 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     }
 
     ///@notice To get cost of a mint based on time and proof 
-    function getCost(bytes32[] calldata proof) public returns (uint256) {
+    function getCost(bytes32[] calldata proof) public view returns (uint256) {
         bool whitelisted = MerkleProof.verify(proof, root, toBytes32(msg.sender)) == true;
         // if the caller is a whitelisted address and under discoount duration, then set cost to 600 MATIC //
         // otherwise 650 MATIC //
         uint256 cost = whitelisted && block.timestamp > end ? discountedPrice : price;
+        return cost;
     }
     ///@dev create tokens of token type `id` and assigns them to `to`
     /// `to` cannot be a zero address
@@ -114,7 +118,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         bool whitelisted = MerkleProof.verify(proof, root, toBytes32(msg.sender)) == true;
         // if the caller is a whitelisted address and under discoount duration, then set cost to 600 MATIC //
         // otherwise 650 MATIC //
-        uint256 cost = whitelisted && block.timestamp > end ? discountedPrice : price;
+        uint256 cost = whitelisted && block.timestamp < end ? discountedPrice : price;
         // get funds //
         require(msg.value >= cost, "Insufficient funds!");
         _moveFunds(cost);
