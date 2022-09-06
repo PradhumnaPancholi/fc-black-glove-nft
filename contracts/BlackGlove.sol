@@ -53,6 +53,9 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     ///@notice Where funds from mint will go to //
     address public beneficiary;
 
+    ///@notice Event will be triggered whenever a new NFT is minted with address and amount//
+    event Minted(address indexed caller, uint256 amount);
+
     ///@notice Event will be triggered whenever funds were deployed//
     event Withdraw(address indexed caller, uint256 amount);
 
@@ -116,6 +119,8 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         // safemint and transfer//
         _safeMint(msg.sender, id);
         _setTokenURI(id, TOKEN_URI);
+        //emit event//
+        emit Minted(msg.sender, msg.value);
     }
     
     ///@notice To pay each dev 1% on a mint
@@ -137,10 +142,11 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     }
 
     function withdraw() public payable onlyOwner{
-        address owner = owner();
-        uint256 amount = IERC20(MATIC).balanceOf(address(this));
-        (bool success) = IERC20(MATIC).transfer(owner, amount);
-        emit Withdraw(msg.sender, address(this).balance);
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No funds left to withdraw");
+        (bool success, ) = (msg.sender).call{value: balance}("");
+        require(success, "Withdrawal Failed");
+        emit Withdraw(msg.sender, balance);
     }
 
     receive() external payable {
