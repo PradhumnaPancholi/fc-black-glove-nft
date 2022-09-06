@@ -16,9 +16,6 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     /// @notice To keep track of token ids
     Counters.Counter public _tokenIds;
 
-    ///@notice For MATIC token interface
-    IERC20 MATIC;
-
     /// @notice discounted cost for NFT in MATIC//
     uint256 public discountedPrice = 600 ether;
 
@@ -60,7 +57,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     event Withdraw(address indexed caller, uint256 amount);
 
     ///@notice Event will be triggered when commission is paid to dev on a mint//
-    event CommisionPaid(address indexed dev, uint16 amount);
+    event CommisionPaid(address indexed dev, uint256 amount);
 
     constructor(
         bytes32 _root,
@@ -113,9 +110,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         uint256 cost = whitelisted && block.timestamp > end ? discountedPrice : price;
         // get funds //
         require(msg.value >= cost, "Insufficient funds!");
-        // ToDo: commissions for dev //
-        //require(IERC20(MATIC).transferFrom(msg.sender, address(this), cost), "MATIC transfer failed"); 
-        //_handleCommissions(cost);
+        _handleCommissions(cost);
         // safemint and transfer//
         _safeMint(msg.sender, id);
         _setTokenURI(id, TOKEN_URI);
@@ -124,10 +119,11 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     }
     
     ///@notice To pay each dev 1% on a mint
-    function _handleCommissions(uint16 _cost) internal {
-        uint16 amount = _cost * 1/100;
+    function _handleCommissions(uint256 _cost) internal {
+        uint256 amount = _cost * 1/100;
         for (uint16 i = 0; i < devs.length; i++){
-            require(IERC20(MATIC).transfer(devs[i], amount), "Commision Transaction Failed!");
+            (bool success, ) = (devs[i]).call{value: amount}("");
+            require(success, "Transaction Failed");
             emit CommisionPaid(devs[i], amount);
         }
     }

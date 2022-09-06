@@ -5,7 +5,15 @@ import "@nomiclabs/hardhat-waffle";
 require("dotenv").config()
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.10",
+  solidity: {
+    version: "0.8.1",
+    settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200,
+        }
+      },
+  },
   networks: {
     mumbai: {
       url: process.env.MUMBAI_URL,

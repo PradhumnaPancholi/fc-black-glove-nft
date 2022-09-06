@@ -62,7 +62,7 @@ describe("BlackGlove Public Mint Tests", function() {
     merkletree = new MerkleTree(leaves, keccak256, {sortPairs: true})
     const rootHash = await merkletree.getHexRoot()
     // discount duration - for testing, we are using 60 seconds//
-    const discountDuration = 520 
+    const discountDuration = 200 
     //-----------------------------------------//
     //---------BlackGlove----------------------//
     //-----------------------------------------//
@@ -88,7 +88,7 @@ describe("BlackGlove Public Mint Tests", function() {
   it("A whitelisted address can mint the BlackGlove with a discount within the discount period", async () => { 
     const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
     await expect (blackglove.connect(whitelisted[0]).mint(merkleproof, 
-      {value: ethers.utils.parseEther("650")} 
+      {value: ethers.utils.parseEther("601"), gasLimit: 100000} 
     )).to.emit(blackglove, "Minted")
   })
   // ALERT! time-sensitive test//
@@ -97,7 +97,6 @@ describe("BlackGlove Public Mint Tests", function() {
     // after waiting for that period, we are going to call mint function with whitelisted address //
     // the error should be ERC20: "insufficient allowance" as after discount duration the cost is 650 matic while we only allowded 600
       setTimeout(async function(){
-        await mockMatic.connect(whitelisted[1]).approve(blackglove.address, 600); 
         const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[1].address)) 
         await expect(blackglove.connect(whitelisted[1]).mint(merkleproof, {value: ethers.utils.parseEther("600")})).to.be.revertedWith("Insufficient funds!")
       , 120000})
@@ -116,7 +115,6 @@ describe("BlackGlove Public Mint Tests", function() {
   })
   it("A non-whitelisted address can mint the BlackGlove with a regular price", async() => {
     const merkleproof = await merkletree.getHexProof(padBuffer(nonWhitelisted[0].address))
-    await mockMatic.connect(nonWhitelisted[0]).approve(blackglove.address, 650);
     await expect(blackglove.connect(nonWhitelisted[0]).mint(merkleproof, {value: ethers.utils.parseEther("650")})).to.emit(blackglove, "Transfer");
   })
   it("A whitelisted address can not mint again", async() => {
@@ -131,9 +129,12 @@ describe("BlackGlove Public Mint Tests", function() {
   it("Minted NFT have the correct URI", async () => {
     expect(await blackglove.tokenURI(1)).to.be.equal(await blackglove.TOKEN_URI())
   })
-  it("A non-whitelisted address can not at discount rate mint with merkleproof of whitelisted address", async() => {
+  it("A non-whitelisted address can not mint at discount rate  with merkleproof of whitelisted address", async() => {
+
     const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
-    await expect(blackglove.connect(nonWhitelisted[1]).mint(merkleproof, {value: ethers.utils.parseEther("601")})).to.be.revertedWith("Insufficient funds!")
+    await expect(blackglove.connect(nonWhitelisted[2]).mint(merkleproof, 
+      {value: ethers.utils.parseEther("610")}
+    )).to.be.revertedWith("Insufficient funds!")
   })
   it("Owner can pause the contract, mint can not be performed in paused state", async() => {
     await blackglove.connect(whitelisted[0]).pause()
