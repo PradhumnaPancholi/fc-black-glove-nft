@@ -63,6 +63,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         bytes32 _root,
         address[] memory _devs,
         uint256 _discountedPrice,
+        uint256 _price,
         address _fcWallet,
         uint256 _discountDuration
     ) ERC721 ("Fight Club Black Glove", "FCBG") {
@@ -72,8 +73,8 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         //set value for dev address to pay 1% commission on a mint //
         devs = _devs;
         //price and discountedPrice - helps a lot for testing //
-        price = 1 ether;
         discountedPrice  = _discountedPrice ;
+        price = _price;
         //fight club wallet address//
         beneficiary = _fcWallet;
         //set discountDuration//

@@ -69,8 +69,10 @@ describe("BlackGlove Public Mint Tests", function() {
     //deploy the contract with root hash for whitelisted MerkleTree
     console.log("Deploying BlackGlove with root hash :", rootHash)
     const BlackGlove = await ethers.getContractFactory("BlackGloveMock")
- const discountedPrice = ethers.utils.parseEther((0.5).toString())
-    blackglove = await BlackGlove.deploy(rootHash, dev, discountedPrice, fcWallet, discountDuration)
+    //setting price and discountedPrice.
+    const discountedPrice = ethers.utils.parseUnits("600", 18)
+    const price = ethers.utils.parseUnits("650", 18)
+    blackglove = await BlackGlove.deploy(rootHash, dev, discountedPrice, price, fcWallet, discountDuration)
   })
   it("Total supply of 1000", async () => {
     //set the _tokenIds to max supply - the variable used for comparison//
