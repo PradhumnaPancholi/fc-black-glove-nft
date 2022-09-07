@@ -134,10 +134,10 @@ describe("BlackGlove Public Mint Tests", function() {
     await expect(blackglove.connect(nonWhitelisted[0]).mint(merkleproof, {value: ethers.utils.parseEther("650")})).to.emit(blackglove, "Transfer");
   })
   it("A whitelisted address can not mint again", async() => {
-    const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
-    await expect(blackglove.connect(whitelisted[0]).mint(merkleproof, 
+    const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[1].address))
+    await expect(blackglove.connect(whitelisted[1]).mint(merkleproof, 
       {value: ethers.utils.parseEther("600"), gasLimit: 10000000}
-    )).to.be.revertedWith("Insufficient funds!")
+    )).to.be.revertedWith("A wallet can not mint more than 1 Black Glove")
   })
   it("A non-whitelisted address can not mint again", async() => {
     const merkleproof = await merkletree.getHexProof(padBuffer(nonWhitelisted[0].address))
