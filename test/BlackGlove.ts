@@ -9,7 +9,6 @@ describe("BlackGlove Public Mint Tests", function() {
   //Global variables //
   //values will be set inside "before" during setup//
   let blackglove: Contract
-  let mockMatic: Contract
   let merkletree: any  
   let owner:  any
   let dev: any
@@ -24,21 +23,8 @@ describe("BlackGlove Public Mint Tests", function() {
   //--------------------------------------------------------------------------------------------------//
   // Setup/Deployment//
   before(async function(){
-
-    //--------------------------------------//
-    //----------Mock MATIC------------------//
-    //--------------------------------------//
-    console.log("Deploying Mock Matic ERC-20 token")
-    const MockMatic = await ethers.getContractFactory("MockMatic")
-    mockMatic = await MockMatic.deploy()
-    console.log("Mock MATIC deployed at: ", mockMatic.address)
     // get accounts (10) for test suit
     let accounts:any = await ethers.getSigners()
-    //distribute mock token to test accounts //
-    console.log("Sending 2000 Mock Matic to each test account.....")
-    accounts.forEach(async function(account:any) {
-        mockMatic.transfer(account.address, 2000)
-    })
     //-------------------------------------//
     // ---------FC-BlackGlove-Deployment-Prep-----------------//
     // -----------------------------------//
@@ -47,17 +33,17 @@ describe("BlackGlove Public Mint Tests", function() {
       return account.address
     })
    // console.log('dev', dev)
-    //fc - benficiary wallet//
-    fcWallet = accounts[3].address
-    // take first five addresses for whitelist//
-    whitelisted = accounts.slice(0, 5)
-    // the next five addresses for non-whitelisted accounts
-    nonWhitelisted = accounts.slice(6, 10)
-    // hash whitelist addresses for creating leaf nodes 
-    console.log("Creating MerkleTree for whitelist")
-    const leaves = whitelisted.map(function(account:any){
+   //fc - benficiary wallet//
+   fcWallet = accounts[3].address
+   // take first five addresses for whitelist//
+   whitelisted = accounts.slice(0, 5)
+   // the next five addresses for non-whitelisted accounts
+   nonWhitelisted = accounts.slice(6, 10)
+   // hash whitelist addresses for creating leaf nodes 
+   console.log("Creating MerkleTree for whitelist")
+   const leaves = whitelisted.map(function(account:any){
       return padBuffer(account.address)
-    })
+   })
     //create MerkleTree for whitelisted addresses 
     merkletree = new MerkleTree(leaves, keccak256, {sortPairs: true})
     const rootHash = await merkletree.getHexRoot()
@@ -141,16 +127,15 @@ describe("BlackGlove Public Mint Tests", function() {
   })
   it("A non-whitelisted address can not mint again", async() => {
     const merkleproof = await merkletree.getHexProof(padBuffer(nonWhitelisted[0].address))
-    await mockMatic.connect(nonWhitelisted[0]).approve(blackglove.address, 650)
     await expect(blackglove.connect(nonWhitelisted[0]).mint(merkleproof)).to.be.revertedWith("A wallet can not mint more than 1 Black Glove")
   })
   it("Minted NFT have the correct URI", async () => {
     expect(await blackglove.tokenURI(1)).to.be.equal(await blackglove.TOKEN_URI())
   })
-  it("A non-whitelisted address can not mint at discount rate  with merkleproof of whitelisted address", async() => {
+  it("A non-whitelisted address can not mint at discount rate with merkleproof of whitelisted address", async() => {
     const merkleproof = await merkletree.getHexProof(padBuffer(whitelisted[0].address))
     await expect(blackglove.connect(nonWhitelisted[1]).mint(merkleproof, 
-      {value: ethers.utils.parseEther("600"), gasLimit: 10000000}
+      {value: ethers.utils.parseEther("601"), gasLimit: 10000000}
     )).to.be.revertedWith("Insufficient funds!")
   })
   it("Owner can pause the contract, mint can not be performed in paused state", async() => {
