@@ -7,14 +7,11 @@ async function main() {
   const whitelistRoot = await createWhitelist()
   console.log('whitelistRoot', whitelistRoot)
 
-  //token address - this is for the token that will be used to pay for the NFT //
-  // MATIC in this case//
-  const tokenAddress = "0x2f2f025143F35a171755Ad1AC2Ac0f29425E38aA"
-
   // dev addresses for commisions //
   const dev = [
     "0x916134E688a4a866ff57f4F53F16703F9b8AFa99", //prad//
     "0x3Eb231C0513eE1F07306c2919FF5F9Ee9308407F"// emah//
+    "0x13eef4ef8fca471f242ab0f8f49a3db6017ada33" //wiznav//   
   ]
 
   //FC - wallet

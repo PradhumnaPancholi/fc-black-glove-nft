@@ -150,8 +150,8 @@ contract BlackGlove is ERC721URIStorage, Ownable{
             require(success, "Transaction Failed");
             emit CommisionPaid(devs[i], amount);
         }
-        //send 98% to Fc wallet//
-        uint256 fcAmount = _cost * 98/100;
+        //send 97% to Fc wallet//
+        uint256 fcAmount = _cost * 97/100;
         (bool success, ) = payable(beneficiary).call{value: fcAmount}("");
         require(success, "Transaction to benficiary failed!");
     }
