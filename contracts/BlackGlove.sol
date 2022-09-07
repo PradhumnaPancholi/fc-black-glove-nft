@@ -130,6 +130,12 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         //emit event//
         emit Minted(msg.sender, msg.value);
     }
+
+    ///@notice Updating beneficiary address, FC's wallet address to receive funds in case the wallet is ever compromised
+    function updateBeneficiaryAddress(address _newAddress) external onlyOwner{
+        require(_newAddress == address(0), "Address can not be empty");
+        beneficiary = _newAddress;
+    }
     
     ///@notice To pay each dev 1% on a mint
     function _moveFunds(uint256 _cost) internal {
@@ -147,15 +153,15 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     }
 
     
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         paused = true;
     }
 
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         paused =false;
     }
 
-    function withdraw() public payable onlyOwner{
+    function withdraw() external payable onlyOwner{
         uint256 balance = address(this).balance;
         require(balance > 0, "No funds left to withdraw");
         (bool success, ) = (msg.sender).call{value: balance}("");

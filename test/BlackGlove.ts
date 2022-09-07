@@ -182,18 +182,15 @@ describe("BlackGlove Public Mint Tests", function() {
         // add contract balance + ownerBalance - gasspent
         Number(contractBalance) + Number(ownerBalance) - Number(gasSpent)).toFixed(10))
   })
-  it("General User can not withdraw the funds", async () => {
+  it("General user can not withdraw the funds", async () => {
     await expect(blackglove.connect(nonWhitelisted[3]).withdraw()).to.be.revertedWith("Ownable: caller is not the owner")
   })
-  // name//
-  // symbol//
-  // transfer//
-  // owner ship transfer//
-  // token id increaments//
-  // can not mint more than 1000//
-  // only owner can pause//
-  // can not be minted when contract is paused //
-  // only owner can unpause //
-  // only owner can withdraw //
+  it("General user can not update beneficiary address", async () => {
+    await expect(blackglove.connect(nonWhitelisted[0]).updateBeneficiaryAddress(nonWhitelisted[1].address)).to.be.revertedWith("Ownable: caller is not the owner")
+  })  
+  it("Owner can update the beneficiary address", async () => {
+    const newAddress = whitelisted[1].address
+    await expect(blackglove.connect(whitelisted[1]).updateBeneficiaryAddress(newAddress)).to.be.revertedWith("fsdfsD")
+  })
 })
 
