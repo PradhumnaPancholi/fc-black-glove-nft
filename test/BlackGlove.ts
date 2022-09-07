@@ -1,5 +1,5 @@
 import {expect} from "chai"
-import {ethers, waffle} from "hardhat"
+import {ethers} from "hardhat"
 import {Contract} from "ethers"
 import {MerkleTree} from "merkletreejs"
 import keccak256 from "keccak256"
@@ -15,7 +15,7 @@ describe("BlackGlove Public Mint Tests", function() {
   let fcWallet: any
   let whitelisted: any 
   let nonWhitelisted: any
-  const provider = waffle.provider;
+  const provider = ethers.provider;
   //function ro process addresses for leaf nodes //
   const padBuffer = (addr: any) => {
     return Buffer.from(addr.substr(2).padStart(32*2, 0), 'hex')
