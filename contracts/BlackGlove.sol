@@ -59,6 +59,9 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     ///@notice Event will be triggered when commission is paid to dev on a mint//
     event CommisionPaid(address indexed dev, uint256 amount);
 
+    ///@notice Event will be triggered when beneficiary address is changed
+    event BeneficiaryUpdated(address indexed newAddress);
+
     constructor(
         bytes32 _root,
         address[] memory _devs,
@@ -133,8 +136,9 @@ contract BlackGlove is ERC721URIStorage, Ownable{
 
     ///@notice Updating beneficiary address, FC's wallet address to receive funds in case the wallet is ever compromised
     function updateBeneficiaryAddress(address _newAddress) external onlyOwner{
-        require(_newAddress == address(0), "Address can not be empty");
+        require(_newAddress != address(0), "The new address can not be a zero address");
         beneficiary = _newAddress;
+        emit BeneficiaryUpdated(_newAddress);
     }
     
     ///@notice To pay each dev 1% on a mint

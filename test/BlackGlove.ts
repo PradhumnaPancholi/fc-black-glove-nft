@@ -190,7 +190,8 @@ describe("BlackGlove Public Mint Tests", function() {
   })  
   it("Owner can update the beneficiary address", async () => {
     const newAddress = whitelisted[1].address
-    await expect(blackglove.connect(whitelisted[1]).updateBeneficiaryAddress(newAddress)).to.be.revertedWith("fsdfsD")
+    await expect(blackglove.connect(whitelisted[0]).updateBeneficiaryAddress(newAddress)).to.emit(blackglove, "BeneficiaryUpdated")
+    expect(await blackglove.beneficiary()).to.equal(newAddress)
   })
 })
 
