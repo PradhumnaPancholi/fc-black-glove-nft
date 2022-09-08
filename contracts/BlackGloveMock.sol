@@ -11,14 +11,12 @@ contract BlackGloveMock is BlackGlove {
 
     constructor(
         bytes32 _root,
-        address _tokenAddress,
         address[] memory _devs,
+        uint256 _discountedPrice,
+        uint256 _price,
         address _fcWallet,
         uint256 _discountDuration
-    ) BlackGlove (_root, _tokenAddress, _devs, _fcWallet, _discountDuration) {}
-
-
-
+    ) BlackGlove (_root, _devs, _discountedPrice, _price, _fcWallet, _discountDuration) {}
 
     // this function is made for testing totalSupply limit //
     function setTokenIdToMaxSupply() public {
