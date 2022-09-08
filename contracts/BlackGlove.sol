@@ -71,8 +71,6 @@ contract BlackGlove is ERC721URIStorage, Ownable{
         uint256 _discountDuration
     ) ERC721 ("Fight Club Black Glove", "FCBG") {
         root = _root;
-        // set address for MATIC token //
-        //MATIC = IERC20(_tokenAddress);- this wass just used for Mock MATIC during testing//
         //set value for dev address to pay 1% commission on a mint //
         devs = _devs;
         //price and discountedPrice - helps a lot for testing //
