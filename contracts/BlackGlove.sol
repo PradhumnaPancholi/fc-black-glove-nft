@@ -23,7 +23,7 @@ contract BlackGlove is ERC721URIStorage, Ownable{
     uint256 public price;
 
     //URI to read metadata of images to be deployed
-    string constant public TOKEN_URI = "ipfs://QmWPhrAFNjS3JkyEMZSKe4zWGSjXHncUyFiJiSDWyU3qnW";
+    string constant public TOKEN_URI = "ipfs://QmUxTFQbYQku3qtHKHapP8Ex4AKCi4j7fhh2YzNtwyNJgx";
 
     ///@notice Maximum supply of NFTs 
     uint16 constant public MAX_SUPPLY = 1000;
