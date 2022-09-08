@@ -10,6 +10,7 @@ export function createWhitelist() {
 
   let whitelistAddresses = [
     "0x916134E688a4a866ff57f4F53F16703F9b8AFa99", //addtr for testing //
+    "0x87D5aBe0b4322670eAB21E084D461fDB7E92A3A1", // second addr for testing//
     "0x2c8d2e50ee03f98a2f4ccfbe1a61552b79bdf6fa",
     "0x45500800dc3235e1c4aeaedacebb9bf1c223803d",
     "0x2ae0213b4e387f5573e9e89bfc9112afed87e681",
